@@ -28,6 +28,7 @@ from kivy.core.audio import SoundLoader
 
 
 path = sys.argv[0]
+
 absolute_path = os.path.abspath(path)
 repository = os.path.dirname(absolute_path)
 
@@ -51,7 +52,7 @@ class boxHorizontal(BoxLayout):
         rand = random.randrange(len(list_mot))
         self.orientation = "vertical"
         self.spacing = 1
-        self.motADeviner = 'TRAITRE'
+        self.motADeviner = list_mot[rand]
         self.iterateur = 0
         self.maxIteration = 6
         self.correct = []
