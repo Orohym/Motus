@@ -31,7 +31,9 @@ path = sys.argv[0]
 absolute_path = os.path.abspath(path)
 repository = os.path.dirname(absolute_path)
 
-sounds = SoundLoader.load(repository +'/audio/lettre.mp3')#, SoundLoader.load('mytest.wav'), SoundLoader.load('mytest.wav')]
+sounds = [SoundLoader.load(repository +'/audio/lettre.mp3'), SoundLoader.load(repository +'/audio/lettrejaune.mp3'), SoundLoader.load(repository +'/audio/lettrebleu.mp3')]
+winning_sound = SoundLoader.load(repository + '/audio/win.mp3')
+lose_sound = SoundLoader.load(repository + '/audio/motusperdu.mp3')
 file = open(repository + '/data/liste.txt', 'r', encoding = "utf-8")
 lines = file.readlines()
 list_mot = []
@@ -46,7 +48,6 @@ class CapitalInput(TextInput): # Automatic Input in upper case
 class boxHorizontal(BoxLayout):
     def __init__(self):
         super().__init__()
-        #sounds.play()
         rand = random.randrange(len(list_mot))
         self.orientation = "vertical"
         self.spacing = 1
@@ -93,31 +94,17 @@ class boxHorizontal(BoxLayout):
                 for k in range(len(self.textbox.txt.text)):
                     self.listbox[self.iterateur].listbtn[k].text = self.textbox.txt.text[k]
                     self.listbox[self.iterateur].listbtn[k].background_color = blue
-                # on met les lettre en rouge car juste
-
-                for k in range(len(self.motADeviner)):
-                    self.idcolor = 1
-                    self.position = k
-                    #sounds.play()
-                    self.listbox[self.iterateur].listbtn[k].background_color = red
-
+                delay_time = 0.21
+                add_delay = 0
+                remove_delay = 0
+                for k in range(len(self.textbox.txt.text)):
+                    self.listbox[self.iterateur].listbtn[k].idcolor = 0
+                for w in self.listbox[self.iterateur].listbtn:
+                    remove_delay += delay_time
+                    Clock.schedule_once(partial(self.colorLetter,w), add_delay )
+                    add_delay += delay_time
                 # affichage popup gagné
-                size_x = 0.7
-                size_y = 0.7
-                pos_x = abs(0.5 - size_x / 2)
-                pos_y = abs(0.5 - size_y / 2)
-                self.popup = Popup(auto_dismiss=False, title = "Fin de partie", size_hint=(size_x, size_y),
-                      pos_hint={'y': pos_y, 'x': pos_x} )
-                content = BoxLayout(orientation = "vertical",spacing = 10)
-                rep = Label(text = "Gagné ! \nLe mot était "+self.motADeviner, font_size = '40sp' )
-                bouton_new = Button(text='Nouvelle partie', on_press = self.reset)
-                bouton_exit = Button(text='Quitter', on_press = lambda *args: App.get_running_app().stop())
-                content.add_widget(rep)
-                content.add_widget(bouton_new)
-                content.add_widget(bouton_exit)
-                self.popup.content = content
-                self.popup.open()
-
+                Clock.schedule_once(self.popupwin, add_delay+0.2)
 
             # test si les mots on la même longueur
             elif len(self.textbox.txt.text) == len(self.motADeviner):
@@ -146,19 +133,19 @@ class boxHorizontal(BoxLayout):
                         del devin[iter]
                     else:
                         couleur[j] = 2 # blue =2
-                delay_time = 0.5
+                delay_time = 0.21
                 add_delay = 0
                 remove_delay = 0
-
                 for k in range(len(self.textbox.txt.text)):
                     self.listbox[self.iterateur].listbtn[k].idcolor = couleur[k]
                 for w in self.listbox[self.iterateur].listbtn:
                     remove_delay += delay_time
                     Clock.schedule_once( partial(self.colorLetter,w), add_delay )
                     add_delay += delay_time
-                Clock.schedule_once(self.newline, add_delay+1)
+                Clock.schedule_once(self.newline, add_delay+0.2)
 
             else : # Si pas la même longueur, grille une chance
+                lose_sound.play()
                 for k in range(len(self.motADeviner)):
                     if k in self.correct:
                         self.listbox[self.iterateur+1].listbtn[k].text = self.motADeviner[k]
@@ -174,30 +161,24 @@ class boxHorizontal(BoxLayout):
         # encore une chance de gagné
         elif self.iterateur == (self.maxIteration-1) and self.textbox.txt.text == self.motADeviner:
                 # Si on a le bon mot popup Gagné !
-                for k in range(len(self.motADeviner)):
-                    self.listbox[self.iterateur].listbtn[k].text = self.motADeviner[k]
-                    self.idcolor = 1
-                    self.position = k
-                    Clock.usleep(30)
-                    self.listbox[self.iterateur].listbtn[k].background_color = red
-                size_x = 0.7
-                size_y = 0.7
-                pos_x = abs(0.5 - size_x / 2)
-                pos_y = abs(0.5 - size_y / 2)
-                self.popup = Popup(auto_dismiss=False, title = "Fin de partie", size_hint=(size_x, size_y),
-                      pos_hint={'y': pos_y, 'x': pos_x} )
-                content = BoxLayout(orientation = "vertical",spacing = 10)
-                rep = Label(text = "Gagné ! \nLe mot était "+self.motADeviner, font_size = '40sp' )
-                bouton_new = Button(text='Nouvelle partie', on_press = self.reset)
-                bouton_exit = Button(text='Quitter', on_press = lambda *args: App.get_running_app().stop())
-                content.add_widget(rep)
-                content.add_widget(bouton_new)
-                content.add_widget(bouton_exit)
-                self.popup.content = content
-                self.popup.open()
-
+                for k in range(len(self.textbox.txt.text)):
+                    self.listbox[self.iterateur].listbtn[k].text = self.textbox.txt.text[k]
+                    self.listbox[self.iterateur].listbtn[k].background_color = blue
+                for k in range(len(self.textbox.txt.text)):
+                    self.listbox[self.iterateur].listbtn[k].idcolor = 0
+                delay_time = 0.21
+                add_delay = 0
+                remove_delay = 0
+                for w in self.listbox[self.iterateur].listbtn:
+                    remove_delay += delay_time
+                    Clock.schedule_once( partial(self.colorLetter,w), add_delay )
+                    add_delay += delay_time
+                winning_sound.play()
+                # affichage popup gagné
+                Clock.schedule_once(self.popupwin, add_delay+0.2)
         # perdu
         else:
+            lose_sound.play()
             size_x = 0.7
             size_y = 0.7
             pos_x = abs(0.5 - size_x / 2)
@@ -257,6 +238,7 @@ class boxHorizontal(BoxLayout):
 
     def colorLetter(self, widget,dt):
         widget.background_color = self.colorid[widget.idcolor]
+        sounds[widget.idcolor].play()
 
     def newline(self, instance):
         blue = [0,0,222,0.81]
@@ -271,6 +253,25 @@ class boxHorizontal(BoxLayout):
         self.listbox[self.iterateur].listbtn[0].background_color = blue
         self.listbox[self.iterateur].listbtn[-1].text = self.motADeviner[-1]
         self.listbox[self.iterateur].listbtn[-1].background_color = blue
+
+    def popupwin(self, instance):
+        winning_sound.play()
+        size_x = 0.7
+        size_y = 0.7
+        pos_x = abs(0.5 - size_x / 2)
+        pos_y = abs(0.5 - size_y / 2)
+        self.popup = Popup(auto_dismiss=False, title = "Fin de partie", size_hint=(size_x, size_y),
+              pos_hint={'y': pos_y, 'x': pos_x} )
+        content = BoxLayout(orientation = "vertical",spacing = 10)
+        rep = Label(text = "Gagné ! \nLe mot était "+self.motADeviner, font_size = '40sp' )
+        bouton_new = Button(text='Nouvelle partie', on_press = self.reset)
+        bouton_exit = Button(text='Quitter', on_press = lambda *args: App.get_running_app().stop())
+        content.add_widget(rep)
+        content.add_widget(bouton_new)
+        content.add_widget(bouton_exit)
+        self.popup.content = content
+        self.popup.open()
+
 
 class Motus(App):
     def build(self):
