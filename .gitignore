@@ -1,3 +1,6 @@
 .env
 kivy/
 test.py
+cxfreeze/
+setup.py
+build/
